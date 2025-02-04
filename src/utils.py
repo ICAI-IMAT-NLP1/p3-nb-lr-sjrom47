@@ -2,6 +2,7 @@ from typing import List, Dict
 import torch
 import re
 import string
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 
 
 def remove_punctuations(input_col):
@@ -79,7 +80,9 @@ class SentimentExample:
         raise NotImplemented
 
 
-def evaluate_classification(predictions: torch.Tensor, labels: torch.Tensor) -> Dict[str, float]:
+def evaluate_classification(
+    predictions: torch.Tensor, labels: torch.Tensor
+) -> Dict[str, float]:
     """
     Evaluate classification metrics including accuracy, precision, recall, and F1-score.
 
@@ -90,6 +93,19 @@ def evaluate_classification(predictions: torch.Tensor, labels: torch.Tensor) -> 
     Returns:
         dict: A dictionary containing the calculated metrics.
     """
-    metrics: Dict[str, float] = None
+    metrics_functions: List[function] = [
+        accuracy_score,
+        recall_score,
+        precision_score,
+        f1_score,
+    ]
+    metrics_names: List[str] = [
+        f.__name__.split("_")[0] if not f.__name__.startswith("f1") else f.__name__
+        for f in metrics_functions
+    ]
+    metrics: Dict[str, float] = {
+        metric_name: metric(labels, predictions)
+        for metric_name, metric in zip(metrics_names, metrics_functions)
+    }
 
     return metrics
