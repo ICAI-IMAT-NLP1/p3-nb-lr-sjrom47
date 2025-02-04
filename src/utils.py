@@ -6,7 +6,7 @@ import string
 
 def accuracy_score(y_true, y_pred):
     """To calculate the accuracy score of the model"""
-    return (y_true == y_pred).mean()
+    return (y_true == y_pred).sum() / len(y_true)
 
 
 def recall_score(y_true, y_pred):
