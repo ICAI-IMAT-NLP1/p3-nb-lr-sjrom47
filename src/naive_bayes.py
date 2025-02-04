@@ -70,15 +70,20 @@ class NaiveBayes:
         Returns:
             Dict[int, torch.Tensor]: Conditional probabilities of each word for each class.
         """
-        total_counts: Dict[int, torch.Tensor] = {
-            int(label): features[labels == label, :].sum(dim=0) for label in labels
-        }
+        unique_labels = torch.unique(labels)
+        total_counts: Dict[int, torch.Tensor] = {}
+        class_word_counts: Dict[int, torch.Tensor] = {}
 
-        class_word_counts: Dict[int, torch.Tensor] = {
-            int(label): (feature + delta)
-            / (total_counts[int(label)].sum() + delta * self.vocab_size)
-            for label, feature in zip(labels, features)
-        }
+        for lbl in unique_labels:
+            # Boolean mask for current label
+            mask = labels == lbl
+            # Sum word counts for all samples of the current label
+            word_sum = features[mask, :].sum(dim=0)
+            total_counts[int(lbl)] = word_sum
+            # Apply smoothing to get probabilities for each word in the class
+            class_word_counts[int(lbl)] = (word_sum + delta) / (
+                word_sum.sum() + delta * self.vocab_size
+            )
 
         return class_word_counts
 
@@ -146,5 +151,5 @@ class NaiveBayes:
             raise Exception("Model not trained. Please call the train method first.")
 
         log_posteriors: torch.Tensor = self.estimate_class_posteriors(feature)
-        probs: torch.Tensor = torch.nn.functional.softmax(log_posteriors)
+        probs: torch.Tensor = torch.nn.functional.softmax(log_posteriors, dim=0)
         return probs
