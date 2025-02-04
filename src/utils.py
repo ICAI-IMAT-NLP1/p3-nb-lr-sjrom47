@@ -2,7 +2,32 @@ from typing import List, Dict
 import torch
 import re
 import string
-from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
+
+
+def accuracy_score(y_true, y_pred):
+    """To calculate the accuracy score of the model"""
+    return (y_true == y_pred).mean()
+
+
+def recall_score(y_true, y_pred):
+    """To calculate the recall score of the model"""
+    true_positives = (y_true * y_pred).sum()
+    actual_positives = y_true.sum()
+    return true_positives / actual_positives
+
+
+def precision_score(y_true, y_pred):
+    """To calculate the precision score of the model"""
+    true_positives = (y_true * y_pred).sum()
+    predicted_positives = y_pred.sum()
+    return true_positives / predicted_positives
+
+
+def f1_score(y_true, y_pred):
+    """To calculate the f1 score of the model"""
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+    return 2 * (precision * recall) / (precision + recall)
 
 
 def remove_punctuations(input_col):
